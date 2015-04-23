@@ -82,9 +82,41 @@ def contacts(contactid):
 
 @app.route('/delete/<contactid>')
 def deleteSingleContact(contactid):
-        newList = deleteContact(contactid)
-        saveEntries(newList)
-        return redirect(url_for('showContacts'))
+    newList = deleteContact(contactid)
+    saveEntries(newList)
+    return redirect(url_for('showContacts'))
+
+@app.route('/contacts/create')
+def createEntry():
+    return render_template('create.html') 
+
+@app.route('/contacts/created/',methods=['POST'])
+def createdEntry():
+    newName = request.form['name']
+    newLocation = request.form['location']
+    newFollowers = int(request.form['followers'])
+    newTweets = int(request.form['tweets'])
+    makeContact(createContact(newName, newLocation, newFollowers, newTweets))
+    return(redirect(url_for('showContacts')))
+
+@app.route('/contacts/update/<contactid>')
+def updateEntry(contactid):
+    theEntry = getContact(int(contactid))
+    try:
+        return render_template('update.html', entry= theEntry) 
+    except:
+        return "Item doesn't exist"
+
+@app.route('/contacts/updated/',methods=['POST'])
+def updatedEntry():
+    contactid= request.form['id']
+    newName = request.form['name']
+    newLocation = request.form['location']
+    newFollowers = int(request.form['followers'])
+    newTweets = int(request.form['tweets'])
+    newList = updateContact(contactid,newName,newLocation,newFollowers, newTweets)
+    saveEntries(newList)
+    return(redirect(url_for('showContacts'))) 
 
 def createContact(name, location, followers, tweets):
     newContact = {}
@@ -107,6 +139,9 @@ def updateContact(contactid, name, location, followers, tweets):
 
 def deleteContact(contactid):
     return [x for x in getEntries() if x['id'] != int(contactid)]
+
+def getContact(contactid):
+    return [    item for item in getEntries() if item['id'] == int(contactid)][0]
 
 def makeContact(newContact):
     if getEntries():

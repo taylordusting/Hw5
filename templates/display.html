@@ -7,12 +7,10 @@
         <script src="http://code.jquery.com/jquery-latest.js"></script>
         <script src="/static/js/bootstrap.min.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
     </div>
-    <body>
 
 
-        <div class="navbar navbar-default navbar-fixed-top"> 
+        <div class="navbar navbar-default"> 
             <div class=container>
                 <div class="navbar-header">
                     <a class="navbar-brand" href="{{url_for('mainPage')}}"> Contacts App </a>
@@ -23,27 +21,34 @@
                             <a href="{{ url_for('showContacts') }}">Show Contacts </a>
                         </li>
                         <li>
+                            <a href="{{ url_for('createEntry') }}">Create Contact </a>
+                        </li>
+                        <li>
                             <a href="{{ url_for('update') }}">Update Entries </a>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li> <p class="navbar-brand"> Find out what's hot online &nbsp </p></li>
+                        <li> <p class="navbar-brand"> Find out whos's hot online &nbsp </p></li>
                     </ul>
                 </div>
             </div>
         </div>
+    </head>
 
+    <body>
     <div class=container>
         <div class=page-header id=banner>
             <div class=row>
                     <table class="table table-striped table-hover ">
                         <thead>
-                            <tr>
+                         <tr>
                             <th>id</th>
                             <th>Name</th>
                             <th>Location</th>
                             <th>Followers</th>
                             <th>Tweets</th>
+                            <th>Tweet per Follower ratio</th>
+                            <th></th>
                             <th></th>
                         </tr>
                         </thead>
@@ -58,12 +63,9 @@
                                  <td>{{ entry.location }}</td>
                                  <td>{{ entry.followers }}</td>
                                  <td>{{ entry.tweets }}</td>
-        <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
-        <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
-        <script src="http://code.jquery.com/jquery-latest.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <td><a href="{{ url_for('mainPage') }}delete/{{entry.id}}" class="btn btn-default">Delete</a></td>
+                                 <td>{{ (entry.tweets / entry.followers) | round(4) }} 
+                                <td><a href="{{ url_for('showContacts') }}update/{{entry.id}}" class="btn btn-primary">Update</a></td>
+                                <td><a href="{{ url_for('mainPage') }}delete/{{entry.id}}" class="btn btn-default">Delete</a></td>
                              </tr>
                 {% endfor %}
                 </tbody>
