@@ -2,14 +2,15 @@ from flask import Flask
 from flask import g
 from flask import jsonify
 from flask import request
+from flask import render_template
+from flask import redirect
+from flask import url_for
 import queue
 import os
 import sqlite3
 import pickle
 import threading
 from twython import Twython
-from tumblelog import db
-from flask.ext.mongoengine import MongoEngine
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,10 +18,10 @@ entryQueue = queue.Queue()
 app = Flask(__name__)
 app.debug = True
 
-app.config["MONGODB_SETTINGS"] = {'DB': "my_tumble_log"}
-app.config["SECRET_KEY"] = "KeepThisS3cr3t"
+#app.config["MONGODB_SETTINGS"] = {'DB': "my_tumble_log"}
+#app.config["SECRET_KEY"] = "KeepThisS3cr3t"
 
-db = MongoEngine(app)
+#db = MongoEngine(app)
 
 @app.route('/')
 def mainPage(entries=None):
@@ -28,7 +29,7 @@ def mainPage(entries=None):
     return jsonify(contacts = contacts)
 
 @app.route('/contacts/', methods=['GET', 'POST'])
-def songsPage(entries=None):
+def showContacts(entries=None):
     if request.method == 'POST':
         #for key in request.form:
             #entry = eval(key)
@@ -44,7 +45,8 @@ def songsPage(entries=None):
 
     if request.method == 'GET':
         entries= getEntries()
-        return jsonify(contacts =  entries)
+        return render_template('display.html', contacts = entries)
+        # return jsonify(contacts =  entries)
 
 @app.route('/update/')
 def update():
@@ -77,6 +79,12 @@ def contacts(contactid):
             if entry['id'] == int(contactid):
                 print(entry)
                 return jsonify(contact = entry)
+
+@app.route('/delete/<contactid>')
+def deleteSingleContact(contactid):
+        newList = deleteContact(contactid)
+        saveEntries(newList)
+        return redirect(url_for('showContacts'))
 
 def createContact(name, location, followers, tweets):
     newContact = {}
@@ -162,14 +170,14 @@ def resolveEntry(status):
     entryQueue.put( {"name":status['user']['name'], 'location':status['user']['location'], 'followers': status['user']['followers_count'], 'tweets':status['user']['statuses_count'] })
 
 ########## DB ##########
-
+'''
 class Post(db.Document):
     id = db.IntField(required=True)
     name = db.StringField(required=True)
     location = db.StringField(required=True)
     followers = db.IntField(required=True)
     tweets = db.IntField(required=True)
-
+'''
 
 if __name__ == '__main__':
     app.config.from_object('config.ProductionConfig')
