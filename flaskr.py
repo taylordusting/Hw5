@@ -8,7 +8,6 @@ from flask import url_for
 import queue
 import os
 import sqlite3
-import pickle
 import threading
 from twython import Twython
 from pymongo import MongoClient
@@ -70,13 +69,14 @@ def contacts(contactid):
         deleteContact(contactid)
         return jsonify(contacts = newList)
     if request.method == 'GET':
-        entries= getEntries()
-        print(contactid)
-        for entry in entries:
-            print(entry['id'])
-            if entry['id'] == int(contactid):
-                print(entry)
-                return jsonify(contact = entry)
+        return jsonify(contact = [getContact(contactid)])
+        #entries= getEntries()
+        #print(contactid)
+        #for entry in entries:
+        #    print(entry['id'])
+        #    if entry['id'] == int(contactid):
+        #        print(entry)
+        #        return jsonify(contact = entry)
 
 @app.route('/delete/<contactid>')
 def deleteSingleContact(contactid):
@@ -141,7 +141,9 @@ def deleteContact(contactid):
     db.contacts.remove({'id':int(contactid)})
 
 def getContact(contactid):
-    return [    item for item in getEntries() if item['id'] == int(contactid)][0]
+    result = db.contacts.find_one({'id':int(contactid)}, {'_id': False})
+    return result
+    #return [    item for item in getEntries() if item['id'] == int(contactid)][0]
 
 def makeContact(newContact):
     db.contacts.insert_one(newContact)
