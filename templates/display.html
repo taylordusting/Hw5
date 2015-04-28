@@ -47,7 +47,7 @@
                             <th>Location</th>
                             <th>Followers</th>
                             <th>Tweets</th>
-                            <th>Tweet per Follower ratio</th>
+                            <th>Followers per tweet ratio</th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -63,7 +63,7 @@
                                  <td>{{ entry.location }}</td>
                                  <td>{{ entry.followers }}</td>
                                  <td>{{ entry.tweets }}</td>
-                                 <td>{{ (entry.tweets / entry.followers) | round(4) }} 
+                                 <td>{{ (entry.followers / entry.tweets) | round(4) }} 
                                 <td><a href="{{ url_for('showContacts') }}update/{{entry.id}}" class="btn btn-primary">Update</a></td>
                                 <td><a href="{{ url_for('mainPage') }}delete/{{entry.id}}" class="btn btn-default">Delete</a></td>
                              </tr>
