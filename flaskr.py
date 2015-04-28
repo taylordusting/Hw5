@@ -11,6 +11,11 @@ import sqlite3
 import pickle
 import threading
 from twython import Twython
+from pymongo import MongoClient
+
+
+client = MongoClient()
+db = client.test
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -18,10 +23,6 @@ entryQueue = queue.Queue()
 app = Flask(__name__)
 app.debug = True
 
-#app.config["MONGODB_SETTINGS"] = {'DB': "my_tumble_log"}
-#app.config["SECRET_KEY"] = "KeepThisS3cr3t"
-
-#db = MongoEngine(app)
 
 @app.route('/')
 def mainPage(entries=None):
@@ -37,7 +38,7 @@ def showContacts(entries=None):
         newName = request.form['name']
         newLocation = request.form['location']
         newFollowers = request.form['followers']
-        newTweets = reqeuest.form['tweets']
+        newTweets = request.form['tweets']
         newContact = createContact(newName,newLocation, newFollowers, newTweets)
         print(newContact)
         makeContact(newContact)
@@ -82,8 +83,7 @@ def contacts(contactid):
 
 @app.route('/delete/<contactid>')
 def deleteSingleContact(contactid):
-    newList = deleteContact(contactid)
-    saveEntries(newList)
+    deleteContact(contactid)
     return redirect(url_for('showContacts'))
 
 @app.route('/contacts/create')
@@ -114,8 +114,7 @@ def updatedEntry():
     newLocation = request.form['location']
     newFollowers = int(request.form['followers'])
     newTweets = int(request.form['tweets'])
-    newList = updateContact(contactid,newName,newLocation,newFollowers, newTweets)
-    saveEntries(newList)
+    updateContact(contactid,newName,newLocation,newFollowers, newTweets)
     return(redirect(url_for('showContacts'))) 
 
 def createContact(name, location, followers, tweets):
@@ -128,26 +127,27 @@ def createContact(name, location, followers, tweets):
     return newContact
 
 def updateContact(contactid, name, location, followers, tweets):
-    entries = getEntries()
-    for entry in entries:
-        if entry['id'] == int(contactid):
-            entry['name'] = name
-            entry['location'] = location
-            entry['followers'] = followers
-            entry['tweets'] = tweets
-    return entries
+    entry = db.contacts.update({'id':int(contactid)},
+        {
+            "$set": {
+                    "name": name,
+                    "location":location,
+                    "followers":followers,
+                    "tweets":tweets
+                    }
+        }
+        )
+    print(type(contactid))
+    
 
 def deleteContact(contactid):
-    return [x for x in getEntries() if x['id'] != int(contactid)]
+    db.contacts.remove({'id':int(contactid)})
 
 def getContact(contactid):
     return [    item for item in getEntries() if item['id'] == int(contactid)][0]
 
 def makeContact(newContact):
-    if getEntries():
-        newEntries = getEntries() + [newContact]
-    else:
-        newEntries = [newContact]
+    newEntries = newContact
     saveEntries(newEntries)
 
     #infile =  open('contacts.txt',"r+") 
@@ -161,13 +161,12 @@ def getNewID():
         return 0
 
 def saveEntries(contacts):
-    pickle.dump(contacts, open(app.config['PICKLE_PATH'], "wb"))
+    db.contacts.insert_one(contacts)
 
 def getEntries():
-    contacts = []
-    if(os.path.getsize(app.config['PICKLE_PATH']) > 0):
-        contacts = pickle.load(open(app.config['PICKLE_PATH'], "rb"))
+    contacts = [x for x in db.contacts.find()]
     return contacts
+
     
 
 
@@ -215,5 +214,10 @@ class Post(db.Document):
 '''
 
 if __name__ == '__main__':
+    
+    #result = db.contacts.insert_one({'tesst':3})
+    #answer = db.contacts.find()
+    #for document in answer:
+    #        print(document)
     app.config.from_object('config.ProductionConfig')
     app.run()
