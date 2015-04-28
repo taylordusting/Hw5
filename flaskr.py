@@ -63,14 +63,11 @@ def contacts(contactid):
         newLocation = request.form['location']
         newFollowers = request.form['followers']
         newTweets = request.form['tweets']
-        newList = updateContact(contactid,newName,newLocation,newFollowers, newTweets)
-        print(newList)
-        saveEntries(newList)
+        updateContact(contactid,newName,newLocation,newFollowers, newTweets)
         return 'something'
 
     if request.method == 'DELETE':
-        newList = deleteContact(contactid)
-        saveEntries(newList)
+        deleteContact(contactid)
         return jsonify(contacts = newList)
     if request.method == 'GET':
         entries= getEntries()
@@ -147,21 +144,13 @@ def getContact(contactid):
     return [    item for item in getEntries() if item['id'] == int(contactid)][0]
 
 def makeContact(newContact):
-    newEntries = newContact
-    saveEntries(newEntries)
-
-    #infile =  open('contacts.txt',"r+") 
-    #infile.seek(0)
-    #infile.write(str(newEntries))
+    db.contacts.insert_one(newContact)
     
 def getNewID():
     if getEntries():
         return getEntries()[-1]['id']+1
     else:
         return 0
-
-def saveEntries(contacts):
-    db.contacts.insert_one(contacts)
 
 def getEntries():
     contacts = [x for x in db.contacts.find()]
