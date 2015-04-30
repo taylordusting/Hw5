@@ -25,6 +25,9 @@ Start the Flask server.
 python3 flaskr.py
 ```
 
+* Once both MongoDB and the server are running, to pull in tweets from Twitter visit /update
+* Then, on the /contacts page, the information can be seen.
+
 
 
 
