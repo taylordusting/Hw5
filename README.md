@@ -17,7 +17,7 @@ MongoDB
 ### Procedure
 Start MongoDB.
 ```
-mongod
+sudo mongod
 ```
 
 Start the Flask server.
