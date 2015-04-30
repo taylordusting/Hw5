@@ -10,7 +10,7 @@ Twython
 pip3 install twython
 ```
 MongoDB
-* Can be install at: http://docs.mongodb.org/manual/installation/
+* Can be installed at: http://docs.mongodb.org/manual/installation/
 
 
 
